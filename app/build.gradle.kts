@@ -1,3 +1,5 @@
+import com.android.build.gradle.internal.scope.ProjectInfo.Companion.getBaseName
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -28,6 +30,12 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("debug")
+
+        }
+        debug {
+            isMinifyEnabled = false
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
     compileOptions {
@@ -59,7 +67,9 @@ dependencies {
     //cotoutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.1")
     implementation("com.markodevcic:peko:3.0.4")
-
+    //tabLayout Pager
+    implementation("com.google.accompanist:accompanist-pager:0.19.0")
+    implementation("com.google.accompanist:accompanist-pager-indicators:0.19.0")
     //AsyncImage for compose
     implementation("io.coil-kt:coil-compose:2.2.2")
     //image

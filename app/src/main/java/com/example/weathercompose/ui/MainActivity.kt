@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -38,6 +39,8 @@ import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.example.weathercompose.R
 import com.example.weathercompose.ui.models.ScreenState
+import com.example.weathercompose.ui.screens.mainCard
+import com.example.weathercompose.ui.screens.tabLayout
 import com.example.weathercompose.ui.theme.WeatherComposeTheme
 import com.example.weathercompose.ui.viewmodel.WeatherViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -49,26 +52,38 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            var dialogShowAlert by remember {
-                mutableStateOf(false)
+            Image(
+                modifier = Modifier.fillMaxSize(),
+                painter = painterResource(id = R.drawable.backgraund_app),
+                contentDescription = "image_back",
+                contentScale = ContentScale.FillBounds,
+                alpha = 0.5f
+            )
+            Column {
+                mainCard()
+                tabLayout()
             }
-            val apiKey = weatherViewModel.getApi()
-            if (apiKey == "-1") {
-                dialogShowAlert = true
-            }
-            WeatherComposeTheme {
-                // A surface container using the 'background' color from the theme
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    if (dialogShowAlert) {
-                        dialogShowAlert = showAlertDialog(dialogShowAlert, this, weatherViewModel)
-                    } else {
-                        showResult(this, weatherViewModel, this)
-                    }
-                }
-            }
+
+//            var dialogShowAlert by remember {
+//                mutableStateOf(false)
+//            }
+//            val apiKey = weatherViewModel.getApi()
+//            if (apiKey == "-1") {
+//                dialogShowAlert = true
+//            }
+//            WeatherComposeTheme {
+//                // A surface container using the 'background' color from the theme
+//                Surface(
+//                    modifier = Modifier.fillMaxSize(),
+//                    color = MaterialTheme.colorScheme.background
+//                ) {
+//                    if (dialogShowAlert) {
+//                        dialogShowAlert = showAlertDialog(dialogShowAlert, this, weatherViewModel)
+//                    } else {
+//                        showResult(this, weatherViewModel, this)
+//                    }
+//                }
+//            }
         }
     }
 }
@@ -181,7 +196,7 @@ fun showResult(context: Context, vm: WeatherViewModel, live: LifecycleOwner) {
                 onClick = {
                     showAlert = true
                 }, modifier = Modifier
-                    .padding(5.dp)
+                    .padding(5.dp, bottom = 32.dp)
                     .fillMaxWidth()
             ) {
                 Text(text = context.getString(R.string.log_in), fontSize = 16.sp)
