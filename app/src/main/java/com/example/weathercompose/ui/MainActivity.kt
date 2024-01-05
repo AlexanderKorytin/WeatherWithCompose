@@ -32,6 +32,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.net.toUri
 import androidx.lifecycle.LifecycleOwner
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
@@ -163,7 +164,7 @@ fun showResult(context: Context, vm: WeatherViewModel, live: LifecycleOwner) {
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 GlideImage(
-                    model = "https://cdn.weatherapi.com/weather/64x64/day/116.png",
+                    model = icon.toUri(),
                     contentDescription = "load image",
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
@@ -192,7 +193,7 @@ fun showResult(context: Context, vm: WeatherViewModel, live: LifecycleOwner) {
                         when (it) {
                             is ScreenState.ErrorState -> state = "Error: ${it.message}"
                             is ScreenState.ContentState -> {
-                                icon = it.result.icon.substring(2, it.result.icon.length)
+                                icon = "https:${it.result.icon}"
                                 state = """
                         • Облачность:                      ${it.result.cloud}%
                         • Температура (градусы) : ${it.result.temp_c} град. С
