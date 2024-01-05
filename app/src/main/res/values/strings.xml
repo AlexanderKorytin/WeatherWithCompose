@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">WeatherCompose</string>
+    <string name="ok">ok</string>
+    <string name="set_api">Enter Api_Key</string>
+    <string name="log_in">Log in</string>
+    <string name="refresh">Refresh</string>
+</resources>
