@@ -41,7 +41,7 @@ class WeatherRepositoryImpl(
     }
 
     override fun getApiKey(): String {
-        return sharedPreferences.getString(KEY, "-1") ?: "-1"
+        return sharedPreferences.getString(KEY, null) ?: "-1"
     }
 
     companion object {

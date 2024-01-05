@@ -13,7 +13,8 @@ fun CurrentDto.toCurrent(): Current {
         this.condition.icon,
         this.condition.text,
         this.feelslike_c,
-        this.precip_mm,
-        this.temp_c
+        this.pressure_mb,
+        this.temp_c,
+        this.wind_kph
     )
 }

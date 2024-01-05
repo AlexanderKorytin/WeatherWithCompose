@@ -7,4 +7,5 @@ data class Current(
     val feelslike_c: Double,
     val precip_mm: Double,
     val temp_c: Double,
+    val wind_kph: Double,
 )

@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -26,8 +28,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.LifecycleOwner
 import com.example.weathercompose.R
 import com.example.weathercompose.ui.models.ScreenState
 import com.example.weathercompose.ui.theme.WeatherComposeTheme
@@ -57,17 +63,10 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    //     getWeather("Voronezh")
-                    weatherViewModel.currentState.observe(this) {
-                        message = when (it) {
-                            is ScreenState.ErrorState -> it.message
-                            is ScreenState.ContentState -> it.result.temp_c.toString()
-                        }
-                    }
-                    if (dialogShowAlert){
-                       dialogShowAlert = showAlertDialog(dialogShowAlert, this, weatherViewModel)
+                    if (dialogShowAlert) {
+                        dialogShowAlert = showAlertDialog(dialogShowAlert, this, weatherViewModel)
                     } else {
-                        showResult("Voronezh", message, this, weatherViewModel)
+                        showResult(this, weatherViewModel, this)
                     }
                 }
             }
@@ -112,6 +111,7 @@ fun showAlertDialog(dialogShow: Boolean, context: Context, vm: WeatherViewModel)
                     Button(
                         modifier = Modifier.fillMaxWidth(),
                         onClick = {
+                            if (text == "") text = "-1"
                             vm.saveApi(text)
                             openDialog = false
                         }
@@ -125,19 +125,37 @@ fun showAlertDialog(dialogShow: Boolean, context: Context, vm: WeatherViewModel)
     return openDialog
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun showResult(name: String, message: String, context: Context, vm: WeatherViewModel) {
+fun showResult(context: Context, vm: WeatherViewModel, live: LifecycleOwner) {
     var state by remember {
         mutableStateOf("")
     }
     var showAlert by remember {
         mutableStateOf(false)
     }
+    var text by remember { mutableStateOf("") }
+    var resultIsEmpty by remember {
+        mutableStateOf(true)
+    }
     if (showAlert) {
-       showAlert = showAlertDialog(dialogShow = showAlert, context = context, vm = vm)
+        showAlert = showAlertDialog(dialogShow = showAlert, context = context, vm = vm)
     }
     Column(modifier = Modifier.fillMaxSize()) {
-        if (!showAlert) {
+        Box(modifier = Modifier.fillMaxWidth()) {
+            TextField(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(3.dp),
+                value = text,
+                placeholder = { Text(text = "Enter city name")},
+                label = { Text(text = "city name")},
+                singleLine = true,
+                onValueChange = { text = it },
+                leadingIcon = {Icon(painter = painterResource(id = R.drawable.search), contentDescription = "search")}
+            )
+        }
+        if (!resultIsEmpty) {
             Box(
                 modifier = Modifier
                     .fillMaxHeight(0.5f)
@@ -145,7 +163,7 @@ fun showResult(name: String, message: String, context: Context, vm: WeatherViewM
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "Temp in $name = ${state}", fontSize = 16.sp
+                    text = "${state}", fontSize = 16.sp
                 )
             }
         }
@@ -159,18 +177,29 @@ fun showResult(name: String, message: String, context: Context, vm: WeatherViewM
             ) {
                 Text(text = context.getString(R.string.log_in), fontSize = 16.sp)
             }
-            if (!showAlert) {
-                Button(
-                    onClick = {
-                        state = message
-                    }, modifier = Modifier
-                        .padding(5.dp)
-                        .fillMaxWidth()
-                ) {
-                    Text(text = context.getString(R.string.refresh), fontSize = 16.sp)
-                }
+            Button(
+                onClick = {
+                    vm.getWeather(text)
+                    vm.currentState.observe(live) {
+                        state = when (it) {
+                            is ScreenState.ErrorState -> "Error: ${it.message}"
+                            is ScreenState.ContentState -> """
+                        • Облачность:                      ${it.result.cloud}%
+                        • Температура (градусы) : ${it.result.temp_c} град. С
+                        • Ощущается как:                 ${it.result.feelslike_c} град. С
+                        • Давление:                           ${(it.result.precip_mm)} мм
+                        • Видимость:                         ${(it.result.wind_kph)} км
+                    """.trimIndent()
+                        }
+                        resultIsEmpty = false
+                    }
+                }, modifier = Modifier
+                    .padding(5.dp)
+                    .fillMaxWidth()
+            ) {
+                Text(text = context.getString(R.string.refresh), fontSize = 16.sp)
             }
-
         }
+
     }
 }
