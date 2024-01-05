@@ -60,6 +60,12 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.1")
     implementation("com.markodevcic:peko:3.0.4")
 
+    //AsyncImage for compose
+    implementation("io.coil-kt:coil-compose:2.2.2")
+    //image
+    implementation("com.github.bumptech.glide:glide:4.15.1")
+    implementation("com.github.bumptech.glide:compose:1.0.0-beta01")
+
     implementation("io.insert-koin:koin-android:3.3.0")
 
     implementation("androidx.core:core-ktx:1.9.0")

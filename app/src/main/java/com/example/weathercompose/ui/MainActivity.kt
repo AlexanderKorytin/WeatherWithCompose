@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -28,12 +30,20 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.LifecycleOwner
+import coil.compose.AsyncImage
+import coil.compose.rememberAsyncImagePainter
+import coil.compose.rememberImagePainter
+import coil.request.ImageRequest
+import com.bumptech.glide.Glide
+import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
+import com.bumptech.glide.integration.compose.GlideImage
 import com.example.weathercompose.R
 import com.example.weathercompose.ui.models.ScreenState
 import com.example.weathercompose.ui.theme.WeatherComposeTheme
@@ -125,9 +135,12 @@ fun showAlertDialog(dialogShow: Boolean, context: Context, vm: WeatherViewModel)
     return openDialog
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalGlideComposeApi::class)
 @Composable
 fun showResult(context: Context, vm: WeatherViewModel, live: LifecycleOwner) {
+    var icon by remember {
+        mutableStateOf("")
+    }
     var state by remember {
         mutableStateOf("")
     }
@@ -148,20 +161,35 @@ fun showResult(context: Context, vm: WeatherViewModel, live: LifecycleOwner) {
                     .fillMaxWidth()
                     .padding(3.dp),
                 value = text,
-                placeholder = { Text(text = "Enter city name")},
-                label = { Text(text = "city name")},
+                placeholder = { Text(text = "Enter city name") },
+                label = { Text(text = "city name") },
                 singleLine = true,
                 onValueChange = { text = it },
-                leadingIcon = {Icon(painter = painterResource(id = R.drawable.search), contentDescription = "search")}
+                leadingIcon = {
+                    Icon(
+                        painter = painterResource(id = R.drawable.search),
+                        contentDescription = "search"
+                    )
+                }
             )
         }
         if (!resultIsEmpty) {
-            Box(
+            Column(
                 modifier = Modifier
                     .fillMaxHeight(0.5f)
-                    .fillMaxWidth(),
-                contentAlignment = Alignment.Center
+                    .fillMaxWidth()
+                    .padding(top = 16.dp),
+                verticalArrangement = Arrangement.Top,
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
+                GlideImage(
+                    model = "https://cdn.weatherapi.com/weather/64x64/day/116.png",
+                    contentDescription = "load image",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(64.dp),
+                )
+
                 Text(
                     text = "${state}", fontSize = 16.sp
                 )
@@ -181,15 +209,18 @@ fun showResult(context: Context, vm: WeatherViewModel, live: LifecycleOwner) {
                 onClick = {
                     vm.getWeather(text)
                     vm.currentState.observe(live) {
-                        state = when (it) {
-                            is ScreenState.ErrorState -> "Error: ${it.message}"
-                            is ScreenState.ContentState -> """
+                        when (it) {
+                            is ScreenState.ErrorState -> state = "Error: ${it.message}"
+                            is ScreenState.ContentState -> {
+                                icon = it.result.icon.substring(2, it.result.icon.length)
+                                state = """
                         • Облачность:                      ${it.result.cloud}%
                         • Температура (градусы) : ${it.result.temp_c} град. С
                         • Ощущается как:                 ${it.result.feelslike_c} град. С
                         • Давление:                           ${(it.result.precip_mm)} мм
                         • Видимость:                         ${(it.result.wind_kph)} км
                     """.trimIndent()
+                            }
                         }
                         resultIsEmpty = false
                     }
