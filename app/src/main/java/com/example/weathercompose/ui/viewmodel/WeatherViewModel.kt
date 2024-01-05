@@ -1,6 +1,5 @@
 package com.example.weathercompose.ui.viewmodel
 
-import android.content.SharedPreferences
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -23,7 +22,7 @@ class WeatherViewModel(
         return interactor.getApiKey()
     }
 
-    fun saveApi(apiKey: String){
+    fun saveApi(apiKey: String) {
         interactor.saveApiRKy(apiKey)
     }
 

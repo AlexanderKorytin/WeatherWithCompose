@@ -4,8 +4,6 @@ import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,18 +28,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.LifecycleOwner
-import coil.compose.AsyncImage
-import coil.compose.rememberAsyncImagePainter
-import coil.compose.rememberImagePainter
-import coil.request.ImageRequest
-import com.bumptech.glide.Glide
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.example.weathercompose.R
@@ -60,10 +51,7 @@ class MainActivity : ComponentActivity() {
             var dialogShowAlert by remember {
                 mutableStateOf(false)
             }
-            var message by remember {
-                mutableStateOf("")
-            }
-            var apiKey = weatherViewModel.getApi()
+            val apiKey = weatherViewModel.getApi()
             if (apiKey == "-1") {
                 dialogShowAlert = true
             }
@@ -81,14 +69,6 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
-    }
-
-    fun getWeather(name: String) {
-        weatherViewModel.getWeather(name)
-    }
-
-    companion object {
-        private const val KEY = "key"
     }
 }
 
@@ -191,7 +171,7 @@ fun showResult(context: Context, vm: WeatherViewModel, live: LifecycleOwner) {
                 )
 
                 Text(
-                    text = "${state}", fontSize = 16.sp
+                    text = state, fontSize = 16.sp
                 )
             }
         }

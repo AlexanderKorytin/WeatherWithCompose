@@ -6,7 +6,7 @@ import com.example.weathercompose.domain.models.Current
 import com.example.weathercompose.domain.models.SearchWeatherResult
 import kotlinx.coroutines.flow.Flow
 
-class WeatherInteractorImpl(private val repository: WeatherRepository): WeatherInteractor {
+class WeatherInteractorImpl(private val repository: WeatherRepository) : WeatherInteractor {
     override suspend fun getWeather(city: String): Flow<SearchWeatherResult<Current>> {
         return repository.getCurrentWeather(city)
     }
