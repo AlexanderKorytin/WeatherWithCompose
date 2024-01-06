@@ -1,22 +1,18 @@
 package com.example.weathercompose.ui
 
+import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
+import android.location.LocationManager
+import android.net.Uri
 import android.os.Bundle
+import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -24,21 +20,29 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.dp
+import androidx.lifecycle.lifecycleScope
 import com.example.weathercompose.R
 import com.example.weathercompose.ui.models.ScreenState
 import com.example.weathercompose.ui.screens.mainCard
+import com.example.weathercompose.ui.screens.showAlertDialogEnterCityName
+import com.example.weathercompose.ui.screens.showAlertDialogLogIn
 import com.example.weathercompose.ui.screens.tabLayout
 import com.example.weathercompose.ui.viewmodel.WeatherViewModel
+import com.markodevcic.peko.PermissionRequester
+import com.markodevcic.peko.PermissionResult
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class MainActivity : ComponentActivity() {
-
     private val weatherViewModel by viewModel<WeatherViewModel>()
+    val requester = PermissionRequester.instance()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val city = " Voronezh"
+        lifecycleScope.launch(Dispatchers.IO) {
+            checkPermissionLocation()
+        }.onJoin
         setContent {
             var dialogShowAlert by remember {
                 mutableStateOf(false)
@@ -48,7 +52,11 @@ class MainActivity : ComponentActivity() {
                 dialogShowAlert = true
             }
             dialogShowAlert =
-                showAlertDialog(dialogShow = dialogShowAlert, context = this, vm = weatherViewModel)
+                showAlertDialogLogIn(
+                    dialogShow = dialogShowAlert,
+                    context = this,
+                    vm = weatherViewModel
+                )
             Image(
                 modifier = Modifier.fillMaxSize(),
                 painter = painterResource(id = R.drawable.background_app),
@@ -57,61 +65,64 @@ class MainActivity : ComponentActivity() {
                 alpha = 0.5f
             )
             if (!dialogShowAlert) {
+                if (coordinates != "") {
+                    weatherViewModel.getWeather(coordinates)
+                } else {
+                    showAlertDialogEnterCityName(
+                        dialogShow = true,
+                        context = this,
+                        viewModel = weatherViewModel
+                    )
+                }
                 var state by remember {
                     mutableStateOf<ScreenState>(ScreenState.ErrorState("- Just a moment..."))
                 }
-                weatherViewModel.getWeather(city)
                 weatherViewModel.currentState.observe(this) {
                     state = it
                 }
                 Column {
-                    mainCard(city, state, weatherViewModel)
+                    mainCard(coordinates, state, weatherViewModel, this@MainActivity)
                     tabLayout(state)
                 }
             }
         }
     }
+
+    @SuppressLint("MissingPermission")
+    suspend fun checkPermissionLocation() {
+        requester.request(
+            Manifest.permission.ACCESS_FINE_LOCATION
+        ).collect { result ->
+            when (result) {
+                is PermissionResult.Granted -> {
+                    val locationManager =
+                        getSystemService(Context.LOCATION_SERVICE) as LocationManager
+
+                    val hasNetwork =
+                        locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
+
+                    val lastKnownLocationByNetwork =
+                        locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
+                    lastKnownLocationByNetwork?.let {
+                        coordinates = "${it.latitude},${it.longitude}"
+                    }
+                } // Пользователь дал разрешение, можно продолжать работу
+                is PermissionResult.Denied -> {} // Пользователь отказал в предоставлении разрешения
+                is PermissionResult.Denied.DeniedPermanently -> {
+                    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    intent.data = Uri.fromParts("package", this.packageName, null)
+                    this.startActivity(intent)
+                } // Запрещено навсегда, перезапрашивать нет смысла, предлагаем пройти в настройки
+                is PermissionResult.Cancelled -> {
+                    return@collect
+                } // Запрос на разрешение отменён
+            }
+        }
+    }
+
+    companion object {
+        var coordinates = ""
+    }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun showAlertDialog(dialogShow: Boolean, context: Context, vm: WeatherViewModel): Boolean {
-    var openDialog by remember { mutableStateOf(dialogShow) }
-    var text by remember { mutableStateOf("") }
-    if (openDialog) {
-        AlertDialog(
-            onDismissRequest = {
-                openDialog = false
-            },
-            title = {
-                Text(text = context.getString(R.string.set_api))
-            },
-            text = {
-                Column {
-                    TextField(
-                        value = text,
-                        onValueChange = { text = it }
-                    )
-                }
-            },
-            confirmButton = {
-                Row(
-                    modifier = Modifier.padding(all = 8.dp),
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Button(
-                        modifier = Modifier.fillMaxWidth(),
-                        onClick = {
-                            if (text == "") text = "-1"
-                            vm.saveApi(text)
-                            openDialog = false
-                        }
-                    ) {
-                        Text(context.getString(R.string.ok))
-                    }
-                }
-            }
-        )
-    }
-    return openDialog
-}

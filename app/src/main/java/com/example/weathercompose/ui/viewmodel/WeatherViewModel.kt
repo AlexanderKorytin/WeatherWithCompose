@@ -16,7 +16,7 @@ class WeatherViewModel(
 
     private var screenState: MutableLiveData<ScreenState> = MutableLiveData()
 
-    val currentState: LiveData<ScreenState> get() = screenState
+    val currentState: LiveData<ScreenState> = screenState
 
     fun getApi(): String {
         return interactor.getApiKey()
@@ -38,4 +38,5 @@ class WeatherViewModel(
             }
         }
     }
+
 }
