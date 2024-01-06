@@ -1,8 +1,8 @@
-package com.example.weathercompose.data.dto
+package com.example.weathercompose.data.dto.forecast_days_weather
 
-data class CurrentDto(
+data class Current(
     val cloud: Int,
-    val condition: ConditionDto,
+    val condition: Condition,
     val feelslike_c: Double,
     val feelslike_f: Double,
     val gust_kph: Double,

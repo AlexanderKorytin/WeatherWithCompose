@@ -2,10 +2,10 @@ package com.example.weathercompose.data.network
 
 import android.content.SharedPreferences
 import com.example.weathercompose.data.NetWorkClient
-import com.example.weathercompose.data.dto.CurrentWeatherResponseDto
-import com.example.weathercompose.data.dto.toCurrent
+import com.example.weathercompose.data.dto.forecast_days_weather.WeatherResponseDto
+import com.example.weathercompose.data.dto.forecast_days_weather.toCurrent
 import com.example.weathercompose.domain.api.WeatherRepository
-import com.example.weathercompose.domain.models.Current
+import com.example.weathercompose.domain.models.CurrentWeather
 import com.example.weathercompose.domain.models.SearchWeatherResult
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -16,7 +16,7 @@ class WeatherRepositoryImpl(
 ) : WeatherRepository {
 
 
-    override suspend fun getCurrentWeather(city: String): Flow<SearchWeatherResult<Current>> =
+    override suspend fun getCurrentWeather(city: String): Flow<SearchWeatherResult<CurrentWeather>> =
         flow {
             val apiKey = getApiKey()
             val response = client.getCurrentWeather(city, apiKey)
@@ -26,7 +26,7 @@ class WeatherRepositoryImpl(
                 }
 
                 200 -> {
-                    val currentWeather = (response as CurrentWeatherResponseDto).current.toCurrent()
+                    val currentWeather = (response as WeatherResponseDto).toCurrent()
                     emit(SearchWeatherResult.Data(value = currentWeather))
                 }
 

@@ -18,8 +18,6 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -41,7 +39,6 @@ import com.example.weathercompose.R
 import com.example.weathercompose.ui.models.ScreenState
 import com.example.weathercompose.ui.screens.mainCard
 import com.example.weathercompose.ui.screens.tabLayout
-import com.example.weathercompose.ui.theme.WeatherComposeTheme
 import com.example.weathercompose.ui.viewmodel.WeatherViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -51,39 +48,37 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val city = " Voronezh"
         setContent {
+            var dialogShowAlert by remember {
+                mutableStateOf(false)
+            }
+            val apiKey = weatherViewModel.getApi()
+            if (apiKey == "-1") {
+                dialogShowAlert = true
+            }
+            dialogShowAlert =
+                showAlertDialog(dialogShow = dialogShowAlert, context = this, vm = weatherViewModel)
             Image(
                 modifier = Modifier.fillMaxSize(),
-                painter = painterResource(id = R.drawable.backgraund_app),
+                painter = painterResource(id = R.drawable.background_app),
                 contentDescription = "image_back",
                 contentScale = ContentScale.FillBounds,
                 alpha = 0.5f
             )
-            Column {
-                mainCard()
-                tabLayout()
-            }
-
-//            var dialogShowAlert by remember {
-//                mutableStateOf(false)
-//            }
-//            val apiKey = weatherViewModel.getApi()
-//            if (apiKey == "-1") {
-//                dialogShowAlert = true
-//            }
-//            WeatherComposeTheme {
-//                // A surface container using the 'background' color from the theme
-//                Surface(
-//                    modifier = Modifier.fillMaxSize(),
-//                    color = MaterialTheme.colorScheme.background
-//                ) {
-//                    if (dialogShowAlert) {
-//                        dialogShowAlert = showAlertDialog(dialogShowAlert, this, weatherViewModel)
-//                    } else {
-//                        showResult(this, weatherViewModel, this)
-//                    }
-//                }
-//            }
+           if (!dialogShowAlert) {
+               var state by  remember {
+                   mutableStateOf<ScreenState>(ScreenState.ErrorState(""))
+               }
+               weatherViewModel.getWeather(city)
+               weatherViewModel.currentState.observe(this){
+                  state = it
+               }
+               Column {
+                   mainCard(city, state, weatherViewModel)
+                   tabLayout()
+               }
+           }
         }
     }
 }
@@ -129,104 +124,4 @@ fun showAlertDialog(dialogShow: Boolean, context: Context, vm: WeatherViewModel)
         )
     }
     return openDialog
-}
-
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalGlideComposeApi::class)
-@Composable
-fun showResult(context: Context, vm: WeatherViewModel, live: LifecycleOwner) {
-    var icon by remember {
-        mutableStateOf("")
-    }
-    var state by remember {
-        mutableStateOf("")
-    }
-    var showAlert by remember {
-        mutableStateOf(false)
-    }
-    var text by remember { mutableStateOf("") }
-    var resultIsEmpty by remember {
-        mutableStateOf(true)
-    }
-    if (showAlert) {
-        showAlert = showAlertDialog(dialogShow = showAlert, context = context, vm = vm)
-    }
-    Column(modifier = Modifier.fillMaxSize()) {
-        Box(modifier = Modifier.fillMaxWidth()) {
-            TextField(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(3.dp),
-                value = text,
-                placeholder = { Text(text = "Enter city name") },
-                label = { Text(text = "city name") },
-                singleLine = true,
-                onValueChange = { text = it },
-                leadingIcon = {
-                    Icon(
-                        painter = painterResource(id = R.drawable.search),
-                        contentDescription = "search"
-                    )
-                }
-            )
-        }
-        if (!resultIsEmpty) {
-            Column(
-                modifier = Modifier
-                    .fillMaxHeight(0.5f)
-                    .fillMaxWidth()
-                    .padding(top = 16.dp),
-                verticalArrangement = Arrangement.Top,
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                GlideImage(
-                    model = icon.toUri(),
-                    contentDescription = "load image",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .size(64.dp),
-                )
-
-                Text(
-                    text = state, fontSize = 16.sp
-                )
-            }
-        }
-        Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Bottom) {
-            Button(
-                onClick = {
-                    showAlert = true
-                }, modifier = Modifier
-                    .padding(5.dp, bottom = 32.dp)
-                    .fillMaxWidth()
-            ) {
-                Text(text = context.getString(R.string.log_in), fontSize = 16.sp)
-            }
-            Button(
-                onClick = {
-                    vm.getWeather(text)
-                    vm.currentState.observe(live) {
-                        when (it) {
-                            is ScreenState.ErrorState -> state = "Error: ${it.message}"
-                            is ScreenState.ContentState -> {
-                                icon = "https:${it.result.icon}"
-                                state = """
-                        • Облачность:                      ${it.result.cloud}%
-                        • Температура (градусы) : ${it.result.temp_c} град. С
-                        • Ощущается как:                 ${it.result.feelslike_c} град. С
-                        • Давление:                           ${(it.result.precip_mm)} мм
-                        • Видимость:                         ${(it.result.wind_kph)} км
-                    """.trimIndent()
-                            }
-                        }
-                        resultIsEmpty = false
-                    }
-                }, modifier = Modifier
-                    .padding(5.dp)
-                    .fillMaxWidth()
-            ) {
-                Text(text = context.getString(R.string.refresh), fontSize = 16.sp)
-            }
-        }
-
-    }
 }
