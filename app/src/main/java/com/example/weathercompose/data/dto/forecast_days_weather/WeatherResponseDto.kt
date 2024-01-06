@@ -2,6 +2,7 @@ package com.example.weathercompose.data.dto.forecast_days_weather
 
 import com.example.weathercompose.data.dto.Response
 import com.example.weathercompose.domain.models.CurrentWeather
+import com.example.weathercompose.domain.models.Forecastday
 
 data class WeatherResponseDto(
     val current: Current,

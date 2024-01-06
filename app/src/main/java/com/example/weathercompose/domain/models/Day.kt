@@ -1,4 +1,6 @@
-package com.example.weathercompose.data.dto.forecast_days_weather
+package com.example.weathercompose.domain.models
+
+import com.example.weathercompose.data.dto.forecast_days_weather.Condition
 
 data class Day(
     val avghumidity: Int,

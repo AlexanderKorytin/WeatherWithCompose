@@ -1,4 +1,6 @@
-package com.example.weathercompose.data.dto.forecast_days_weather
+package com.example.weathercompose.domain.models
+
+import com.example.weathercompose.data.dto.forecast_days_weather.Condition
 
 data class Hour(
     val chance_of_rain: Int,

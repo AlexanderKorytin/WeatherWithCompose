@@ -1,5 +1,3 @@
-import com.android.build.gradle.internal.scope.ProjectInfo.Companion.getBaseName
-
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -63,6 +61,9 @@ dependencies {
     implementation("com.google.code.gson:gson:2.10.1")
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+
+    //constraint
+    implementation("androidx.constraintlayout:constraintlayout-compose:1.0.1")
 
     //cotoutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.1")

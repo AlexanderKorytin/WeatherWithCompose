@@ -19,7 +19,7 @@ class RetrofitNetWorkClient(
         }
         return withContext(Dispatchers.IO) {
             try {
-                val response = api.getCurrentWeatherByCity(location = city, apiKey = apiKey)
+                val response = api.getCurrentWeather(location = city, apiKey = apiKey)
                 response.apply { resultCode = 200 }
             } catch (e: Throwable) {
                 Response().apply { resultCode = 500 }
