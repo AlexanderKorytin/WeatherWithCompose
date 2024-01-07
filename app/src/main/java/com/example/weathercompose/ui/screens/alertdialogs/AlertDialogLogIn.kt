@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -38,7 +39,14 @@ fun showAlertDialogLogIn(dialogShow: Boolean, context: Context, vm: WeatherViewM
                 Column {
                     TextField(
                         value = text,
-                        onValueChange = { text = it }
+                        onValueChange = { text = it },
+                        placeholder = {
+                            Text(text = context.getString(R.string.set_api))
+                        },
+                        label = {
+                            Text(text = "api")
+                        },
+                         shape = RoundedCornerShape(8.dp)
                     )
                 }
             },

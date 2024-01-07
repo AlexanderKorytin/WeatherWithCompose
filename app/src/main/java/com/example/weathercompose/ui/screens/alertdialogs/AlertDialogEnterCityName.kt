@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -43,7 +44,15 @@ fun showAlertDialogEnterCityName(
                 Column {
                     TextField(
                         value = name,
-                        onValueChange = { name = it }
+                        onValueChange = { name = it },
+                        singleLine = true,
+                        placeholder = {
+                            Text(text = context.getString(R.string.set_city))
+                        },
+                        label = {
+                            Text(text = "city name")
+                        },
+                        shape = RoundedCornerShape(8.dp)
                     )
                 }
             },
