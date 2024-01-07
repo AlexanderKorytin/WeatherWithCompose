@@ -48,7 +48,7 @@ fun mainCard(
     name: String,
     screenState: ScreenState,
     viewmodel: WeatherViewModel,
-    context: Context
+    context: Context,
 ) {
     val coroutineScope = rememberCoroutineScope()
     var showFlag by remember {
@@ -197,7 +197,10 @@ fun mainCard(
 
                             IconButton(
                                 onClick = {
-                                    viewmodel.getWeather(MainActivity.coordinates)
+                                    coroutineScope.async {
+                                        (context.getActivity() as MainActivity).checkPermissionLocation()
+                                        viewmodel.getWeather(MainActivity.coordinates)
+                                    }
                                 }
                             ) {
                                 Icon(
