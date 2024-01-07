@@ -1,4 +1,4 @@
-package com.example.weathercompose.ui.screens
+package com.example.weathercompose.ui.screens.alertdialogs
 
 import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
@@ -19,31 +19,26 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.weathercompose.R
-import com.example.weathercompose.ui.MainActivity
 import com.example.weathercompose.ui.viewmodel.WeatherViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun showAlertDialogEnterCityName(
-    dialogShow: Boolean,
-    context: Context,
-    viewModel: WeatherViewModel
-): Boolean {
-    var dialog by remember { mutableStateOf(dialogShow) }
-    var name by remember { mutableStateOf("") }
-    if (dialog) {
+fun showAlertDialogLogIn(dialogShow: Boolean, context: Context, vm: WeatherViewModel): Boolean {
+    var openDialog by remember { mutableStateOf(dialogShow) }
+    var text by remember { mutableStateOf("") }
+    if (openDialog) {
         AlertDialog(
             onDismissRequest = {
-
+                openDialog = false
             },
             title = {
-                Text(text = context.getString(R.string.set_city))
+                Text(text = context.getString(R.string.set_api))
             },
             text = {
                 Column {
                     TextField(
-                        value = name,
-                        onValueChange = { name = it }
+                        value = text,
+                        onValueChange = { text = it }
                     )
                 }
             },
@@ -55,9 +50,9 @@ fun showAlertDialogEnterCityName(
                     Button(
                         modifier = Modifier.fillMaxWidth(),
                         onClick = {
-                            MainActivity.coordinates = name
-                            viewModel.getWeather(name)
-                            dialog = false
+                            if (text == "") text = "-1"
+                            vm.saveApi(text)
+                            openDialog = false
                         }
                     ) {
                         Text(context.getString(R.string.ok))
@@ -66,5 +61,5 @@ fun showAlertDialogEnterCityName(
             }
         )
     }
-    return dialog
+    return openDialog
 }

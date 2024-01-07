@@ -1,4 +1,4 @@
-package com.example.weathercompose.ui.screens
+package com.example.weathercompose.ui.screens.tab
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -16,6 +16,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.weathercompose.ui.models.ScreenState
+import com.example.weathercompose.ui.screens.listsweather.listItemHoursWeather
+import com.example.weathercompose.ui.screens.listsweather.listItemWeekWeather
+import com.example.weathercompose.ui.screens.main.alfa
 import com.example.weathercompose.ui.theme.MyLightGray
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
@@ -73,6 +76,7 @@ fun tabLayout(screenState: ScreenState) {
                         is ScreenState.ErrorState -> {
                             Text(text = "Day weather ${screenState.message}")
                         }
+                        else -> {}
                     }
                 }
 
@@ -85,6 +89,7 @@ fun tabLayout(screenState: ScreenState) {
                         is ScreenState.ErrorState -> {
                             Text(text = "Days weather ${screenState.message}")
                         }
+                        else -> {}
                     }
                 }
             }

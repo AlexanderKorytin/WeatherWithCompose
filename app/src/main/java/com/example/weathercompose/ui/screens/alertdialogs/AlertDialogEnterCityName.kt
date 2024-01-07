@@ -1,4 +1,4 @@
-package com.example.weathercompose.ui.screens
+package com.example.weathercompose.ui.screens.alertdialogs
 
 import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
@@ -19,26 +19,31 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.weathercompose.R
+import com.example.weathercompose.ui.MainActivity
 import com.example.weathercompose.ui.viewmodel.WeatherViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun showAlertDialogLogIn(dialogShow: Boolean, context: Context, vm: WeatherViewModel): Boolean {
-    var openDialog by remember { mutableStateOf(dialogShow) }
-    var text by remember { mutableStateOf("") }
-    if (openDialog) {
+fun showAlertDialogEnterCityName(
+    dialogShow: Boolean,
+    context: Context,
+    viewModel: WeatherViewModel
+): Boolean {
+    var dialog by remember { mutableStateOf(dialogShow) }
+    var name by remember { mutableStateOf("") }
+    if (dialog) {
         AlertDialog(
             onDismissRequest = {
-                openDialog = false
+
             },
             title = {
-                Text(text = context.getString(R.string.set_api))
+                Text(text = context.getString(R.string.set_city))
             },
             text = {
                 Column {
                     TextField(
-                        value = text,
-                        onValueChange = { text = it }
+                        value = name,
+                        onValueChange = { name = it }
                     )
                 }
             },
@@ -50,9 +55,9 @@ fun showAlertDialogLogIn(dialogShow: Boolean, context: Context, vm: WeatherViewM
                     Button(
                         modifier = Modifier.fillMaxWidth(),
                         onClick = {
-                            if (text == "") text = "-1"
-                            vm.saveApi(text)
-                            openDialog = false
+                            MainActivity.coordinates = name
+                            viewModel.getWeather(name)
+                            dialog = false
                         }
                     ) {
                         Text(context.getString(R.string.ok))
@@ -61,5 +66,5 @@ fun showAlertDialogLogIn(dialogShow: Boolean, context: Context, vm: WeatherViewM
             }
         )
     }
-    return openDialog
+    return dialog
 }

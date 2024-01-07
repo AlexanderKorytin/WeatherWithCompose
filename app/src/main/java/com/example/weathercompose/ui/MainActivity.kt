@@ -23,10 +23,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.lifecycle.lifecycleScope
 import com.example.weathercompose.R
 import com.example.weathercompose.ui.models.ScreenState
-import com.example.weathercompose.ui.screens.mainCard
-import com.example.weathercompose.ui.screens.showAlertDialogEnterCityName
-import com.example.weathercompose.ui.screens.showAlertDialogLogIn
-import com.example.weathercompose.ui.screens.tabLayout
+import com.example.weathercompose.ui.screens.main.mainCardContent
+import com.example.weathercompose.ui.screens.main.mainCardError
+import com.example.weathercompose.ui.screens.main.mainCardStart
+import com.example.weathercompose.ui.screens.alertdialogs.showAlertDialogEnterCityName
+import com.example.weathercompose.ui.screens.alertdialogs.showAlertDialogLogIn
+import com.example.weathercompose.ui.screens.tab.tabLayout
 import com.example.weathercompose.ui.viewmodel.WeatherViewModel
 import com.markodevcic.peko.PermissionRequester
 import com.markodevcic.peko.PermissionResult
@@ -75,14 +77,25 @@ class MainActivity : ComponentActivity() {
                     )
                 }
                 var state by remember {
-                    mutableStateOf<ScreenState>(ScreenState.ErrorState("- Just a moment..."))
+                    mutableStateOf<ScreenState>(ScreenState.Start)
                 }
                 weatherViewModel.currentState.observe(this) {
                     state = it
                 }
                 Column {
-                    mainCard(coordinates, state, weatherViewModel, this@MainActivity)
-                    tabLayout(state)
+                    when(state){
+                        is ScreenState.ContentState ->{
+                            mainCardContent((state as ScreenState.ContentState).result, weatherViewModel, this@MainActivity)
+                            tabLayout(state)
+                        }
+                        is ScreenState.Start -> {
+                            mainCardStart()
+                        }
+                        is ScreenState.ErrorState -> {
+                            mainCardError((state as ScreenState.ErrorState).message, weatherViewModel, this@MainActivity)
+                            tabLayout(state)
+                        }
+                    }
                 }
             }
         }
